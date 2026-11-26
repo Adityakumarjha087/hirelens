@@ -5,7 +5,14 @@ from typing import Any
 import anthropic
 import httpx2
 
-from app.llm.base import LLMError, StructuredRequest, parse_json_text, strict_schema, user_prompt_with_draft
+from app.llm.base import (
+    UNTRUSTED_CONTENT_RULE,
+    LLMError,
+    StructuredRequest,
+    parse_json_text,
+    strict_schema,
+    user_prompt_with_draft,
+)
 
 
 class AnthropicProvider:
@@ -28,7 +35,7 @@ class AnthropicProvider:
             response = self._client.beta.messages.create(
                 model=self.model,
                 max_tokens=request.max_tokens,
-                system=request.system,
+                system=f"{request.system}\n\n{UNTRUSTED_CONTENT_RULE}",
                 messages=[{"role": "user", "content": user_prompt_with_draft(request)}],
                 output_config={
                     "effort": "low",

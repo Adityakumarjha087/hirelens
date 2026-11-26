@@ -5,7 +5,14 @@ from typing import Any
 import httpx2
 import openai
 
-from app.llm.base import LLMError, StructuredRequest, parse_json_text, strict_schema, user_prompt_with_draft
+from app.llm.base import (
+    UNTRUSTED_CONTENT_RULE,
+    LLMError,
+    StructuredRequest,
+    parse_json_text,
+    strict_schema,
+    user_prompt_with_draft,
+)
 
 
 class OpenAIProvider:
@@ -27,7 +34,7 @@ class OpenAIProvider:
                 model=self.model,
                 max_completion_tokens=request.max_tokens,
                 messages=[
-                    {"role": "system", "content": request.system},
+                    {"role": "system", "content": f"{request.system}\n\n{UNTRUSTED_CONTENT_RULE}"},
                     {"role": "user", "content": user_prompt_with_draft(request)},
                 ],
                 response_format={

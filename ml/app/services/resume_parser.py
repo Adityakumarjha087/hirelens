@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from app.llm.base import LLMProvider
+from app.llm.base import LLMProvider, neutralise_tags
 from app.nlp.ner import EMAIL_RE, PHONE_RE, NERProvider, guess_location, guess_name
 from app.nlp.sections import (
     parse_education,
@@ -81,7 +81,7 @@ def parse_resume_text(text: str, llm: LLMProvider, ner: NERProvider) -> ParseRes
         llm,
         task="resume_parse",
         system=SYSTEM_PROMPT,
-        prompt=f"Parse this resume into the schema.\n<resume>\n{text[:60_000]}\n</resume>",
+        prompt=f"Parse this resume into the schema.\n<resume>\n{neutralise_tags(text[:60_000])}\n</resume>",
         model=ResumeProfile,
         draft=draft,
     )

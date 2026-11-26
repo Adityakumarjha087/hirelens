@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.llm.base import LLMProvider
+from app.llm.base import LLMProvider, neutralise_tags
 from app.nlp.skills import SOFT_SKILLS, skill_key
 from app.schemas import InterviewQuestion, InterviewQuestionSet, InterviewRequest, InterviewResponse
 from app.services.structured import run_structured
@@ -120,7 +120,8 @@ def generate_questions(req: InterviewRequest, llm: LLMProvider) -> InterviewResp
         task="interview_questions",
         system=SYSTEM_PROMPT,
         prompt=(
-            f'Generate {req.count} questions.\n<job title="{req.job.title}">{req.job.description[:15_000]}'
+            f'Generate {req.count} questions.\n<job title="{neutralise_tags(req.job.title)}">'
+            f"{neutralise_tags(req.job.description[:15_000])}"
             f"</job>\n<candidate>{req.profile.model_dump_json()}</candidate>"
         ),
         model=InterviewQuestionSet,

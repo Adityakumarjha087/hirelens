@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import re
+import zipfile
 
 from docx import Document
 from pypdf import PdfReader
@@ -57,7 +58,7 @@ def extract_text(data: bytes, mime: str) -> str:
             text = data.decode("utf-8")
         else:  # pragma: no cover - guarded by detect_mime
             raise UnsupportedFileError(f"Unsupported mime type {mime}")
-    except (PdfReadError, KeyError, ValueError) as exc:
+    except (PdfReadError, KeyError, ValueError, zipfile.BadZipFile, OSError) as exc:
         if isinstance(exc, UnsupportedFileError):
             raise
         raise UnsupportedFileError(f"Could not read file: {exc}") from exc

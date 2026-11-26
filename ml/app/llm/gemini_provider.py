@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.llm.base import LLMError, StructuredRequest, parse_json_text, user_prompt_with_draft
+from app.llm.base import UNTRUSTED_CONTENT_RULE, LLMError, StructuredRequest, parse_json_text, user_prompt_with_draft
 
 
 class GeminiProvider:
@@ -22,7 +22,7 @@ class GeminiProvider:
                 model=self.model,
                 contents=user_prompt_with_draft(request),
                 config={
-                    "system_instruction": request.system,
+                    "system_instruction": f"{request.system}\n\n{UNTRUSTED_CONTENT_RULE}",
                     "response_mime_type": "application/json",
                     "max_output_tokens": request.max_tokens,
                 },

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from app.llm.base import LLMProvider
+from app.llm.base import LLMProvider, neutralise_tags
 from app.nlp.skills import SOFT_SKILLS, extract_skills, extract_skills_from_list, normalize_skills
 from app.schemas import AnalyzeJobRequest, AnalyzeJobResponse, JobAnalysis
 from app.services.structured import run_structured
@@ -90,7 +90,7 @@ def analyze_job(req: AnalyzeJobRequest, llm: LLMProvider) -> AnalyzeJobResponse:
         llm,
         task="job_analysis",
         system=SYSTEM_PROMPT,
-        prompt=f"Job title: {req.title}\n<description>\n{req.description[:30_000]}\n</description>",
+        prompt=f"Job title: {req.title}\n<description>\n{neutralise_tags(req.description[:30_000])}\n</description>",
         model=JobAnalysis,
         draft=draft,
     )

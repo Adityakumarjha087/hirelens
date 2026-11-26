@@ -4,11 +4,17 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+def _not_blank(value: str, minimum: int) -> str:
+    if len(value.strip()) < minimum:
+        raise ValueError(f"must contain at least {minimum} non-whitespace characters")
+    return value
 
 
 # --------------------------------------------------------------------------- resume parsing
@@ -71,11 +77,26 @@ class ParseResumeResponse(StrictModel):
 class ParseTextRequest(StrictModel):
     text: str = Field(min_length=20, max_length=200_000)
 
+    @field_validator("text")
+    @classmethod
+    def _text(cls, v: str) -> str:
+        return _not_blank(v, 20)
+
 
 # --------------------------------------------------------------------------- jobs
 class AnalyzeJobRequest(StrictModel):
     title: str = Field(min_length=2, max_length=200)
     description: str = Field(min_length=20, max_length=50_000)
+
+    @field_validator("title")
+    @classmethod
+    def _title(cls, v: str) -> str:
+        return _not_blank(v, 2)
+
+    @field_validator("description")
+    @classmethod
+    def _description(cls, v: str) -> str:
+        return _not_blank(v, 20)
 
 
 class JobAnalysis(StrictModel):
@@ -181,6 +202,11 @@ class FeedbackJob(StrictModel):
 
 class FeedbackRequest(StrictModel):
     resume_text: str = Field(min_length=20, max_length=200_000)
+
+    @field_validator("resume_text")
+    @classmethod
+    def _resume(cls, v: str) -> str:
+        return _not_blank(v, 20)
     profile: ResumeProfile | None = None
     job: FeedbackJob | None = None
 

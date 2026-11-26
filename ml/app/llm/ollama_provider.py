@@ -4,7 +4,14 @@ from typing import Any
 
 import httpx2
 
-from app.llm.base import LLMError, StructuredRequest, parse_json_text, strict_schema, user_prompt_with_draft
+from app.llm.base import (
+    UNTRUSTED_CONTENT_RULE,
+    LLMError,
+    StructuredRequest,
+    parse_json_text,
+    strict_schema,
+    user_prompt_with_draft,
+)
 
 
 class OllamaProvider:
@@ -29,7 +36,7 @@ class OllamaProvider:
                     "format": strict_schema(request.json_schema),
                     "options": {"temperature": 0},
                     "messages": [
-                        {"role": "system", "content": request.system},
+                        {"role": "system", "content": f"{request.system}\n\n{UNTRUSTED_CONTENT_RULE}"},
                         {"role": "user", "content": user_prompt_with_draft(request)},
                     ],
                 },

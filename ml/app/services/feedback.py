@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from app.llm.base import LLMProvider
+from app.llm.base import LLMProvider, neutralise_tags
 from app.nlp.ner import EMAIL_RE, PHONE_RE
 from app.nlp.sections import split_sections
 from app.nlp.skills import SOFT_SKILLS, extract_skills, normalize_skills, skill_key
@@ -270,12 +270,14 @@ def heuristic_feedback(req: FeedbackRequest) -> ResumeFeedback:
 
 def generate_feedback(req: FeedbackRequest, llm: LLMProvider) -> FeedbackResponse:
     draft = heuristic_feedback(req)
-    job_part = f"\nTarget job: {req.job.title}\n<job>{req.job.description[:15_000]}</job>" if req.job else ""
+    job_desc = neutralise_tags(req.job.description[:15_000]) if req.job else ""
+    job_part = f"\nTarget job: {req.job.title}\n<job>{job_desc}</job>" if req.job else ""
+    resume = neutralise_tags(req.resume_text[:40_000])
     feedback, source = run_structured(
         llm,
         task="resume_feedback",
         system=SYSTEM_PROMPT,
-        prompt=f"Review this resume for ATS-friendliness.{job_part}\n<resume>\n{req.resume_text[:40_000]}\n</resume>",
+        prompt=f"Review this resume for ATS-friendliness.{job_part}\n<resume>\n{resume}\n</resume>",
         model=ResumeFeedback,
         draft=draft,
     )
