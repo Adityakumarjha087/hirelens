@@ -97,3 +97,13 @@ def test_guessers() -> None:
 def test_build_ner_falls_back_to_rules() -> None:
     assert build_ner("auto", "definitely_missing_model").name in {"rule", "spacy"}
     assert build_ner("rule", "x").name == "rule"
+
+
+def test_nested_matches_are_ignored() -> None:
+    assert extract_skills("Tailwind CSS experience is a plus") == ["Tailwind CSS"]
+    assert extract_skills("We use CSS and Tailwind CSS") == ["CSS", "Tailwind CSS"]
+    assert extract_skills("React Native apps") == ["React Native"]
+
+
+def test_or_lists() -> None:
+    assert "Go" in extract_skills_from_list("backend services with Python or Go")

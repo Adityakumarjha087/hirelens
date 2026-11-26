@@ -24,6 +24,25 @@ SYSTEM_PROMPT = (
 )
 
 
+def redact_profile(profile: ResumeProfile) -> ResumeProfile:
+    """Blind-screening view: drop identity/contact, neutralise pronouns, hide graduation years (age proxy)."""
+    name = profile.name or None
+
+    def clean(value: str) -> str:
+        return redact(value, name)[0] if value else value
+
+    blind = profile.model_copy(deep=True)
+    blind.name, blind.email, blind.phone = "", None, None
+    blind.summary = clean(blind.summary)
+    for exp in blind.experience:
+        exp.highlights = [clean(h) for h in exp.highlights]
+    for edu in blind.education:
+        edu.year = None
+    for proj in blind.projects:
+        proj.description = clean(proj.description)
+    return blind
+
+
 def heuristic_profile(text: str, ner: NERProvider) -> ResumeProfile:
     sections = split_sections(text)
     entities = ner.extract(text)
@@ -72,6 +91,7 @@ def parse_resume_text(text: str, llm: LLMProvider, ner: NERProvider) -> ParseRes
         profile=profile,
         text=text,
         redacted_text=redacted,
+        redacted_profile=redact_profile(profile),
         entities=ner.extract(text)[:100],
         meta=ParseMeta(llm_provider=llm.name, source=source, ner_provider=ner.name, char_count=len(text)),
     )

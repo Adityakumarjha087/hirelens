@@ -63,6 +63,7 @@ class ParseResumeResponse(StrictModel):
     profile: ResumeProfile
     text: str
     redacted_text: str
+    redacted_profile: ResumeProfile = Field(description="Profile with identity, gender and age signals removed")
     entities: list[Entity]
     meta: ParseMeta
 

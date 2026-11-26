@@ -203,19 +203,27 @@ def normalize_skills(skills: Iterable[str]) -> list[str]:
 
 
 def extract_skills(text: str) -> list[str]:
-    """Return canonical skills found in ``text`` ordered by first occurrence."""
-    hits: list[tuple[int, str]] = []
+    """Return canonical skills found in ``text`` ordered by first occurrence.
+
+    A match nested inside a longer skill match (e.g. "CSS" inside "Tailwind CSS") is ignored.
+    """
+    spans: list[tuple[int, int, str]] = []
     for canonical, pattern in _compiled():
-        match = pattern.search(text)
-        if match:
-            hits.append((match.start(), canonical))
-    hits.sort()
-    return [skill for _, skill in hits]
+        spans.extend((m.start(), m.end(), canonical) for m in pattern.finditer(text))
+    first: dict[str, int] = {}
+    for start, end, canonical in spans:
+        nested = any(
+            o_start <= start and end <= o_end and (o_end - o_start) > (end - start) and other != canonical
+            for o_start, o_end, other in spans
+        )
+        if not nested and canonical not in first:
+            first[canonical] = start
+    return [skill for skill, _ in sorted(first.items(), key=lambda kv: kv[1])]
 
 
 def extract_skills_from_list(line: str) -> list[str]:
     """For short comma-separated lists ("Go, Terraform and R"), accept ambiguous aliases too."""
-    if len(line) > 120 or ("," not in line and " and " not in line and "/" not in line):
+    if len(line) > 120 or not any(sep in line for sep in (",", " and ", " or ", "/")):
         return []
     index = _alias_index()
     tokens = re.split(r",|;|\band\b|\bor\b|/(?!cd)", line, flags=re.IGNORECASE)

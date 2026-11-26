@@ -213,3 +213,12 @@ def test_redaction() -> None:
     for leak in ("Maria", "Lopez", "maria@x.io", "She ", "mother", "41", "Female", "her team"):
         assert leak not in out
     assert counts["name"] >= 2 and counts["contact"] >= 2 and counts["age"] >= 1 and counts["gender"] >= 2
+
+
+def test_redacted_profile_hides_identity(resume_text: str) -> None:
+    res = parse_resume_text(resume_text, FakeProvider(), RuleBasedNER())
+    blind = res.redacted_profile
+    assert blind.name == "" and blind.email is None and blind.phone is None
+    assert all(e.year is None for e in blind.education)
+    assert "She " not in blind.summary and "They led" in blind.summary
+    assert blind.skills == res.profile.skills

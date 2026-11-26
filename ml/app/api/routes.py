@@ -53,12 +53,12 @@ EngineDep = Annotated[Engine, Depends(get_engine)]
 async def parse_resume_file(engine: EngineDep, file: Annotated[UploadFile, File()]) -> ParseResumeResponse:
     data = await file.read(engine.settings.max_upload_bytes + 1)
     if len(data) > engine.settings.max_upload_bytes:
-        raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "File exceeds upload limit")
+        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "File exceeds upload limit")
     try:
         mime = detect_mime(file.filename or "", file.content_type, data[:2048])
         text = await asyncio.to_thread(extract_text, data, mime)
     except UnsupportedFileError as exc:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
     return await asyncio.to_thread(parse_resume_text, text, engine.llm, engine.ner)
 
 

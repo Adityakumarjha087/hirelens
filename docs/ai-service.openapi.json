@@ -1328,6 +1328,10 @@
             "type": "string",
             "title": "Redacted Text"
           },
+          "redacted_profile": {
+            "$ref": "#/components/schemas/ResumeProfile",
+            "description": "Profile with identity, gender and age signals removed"
+          },
           "entities": {
             "items": {
               "$ref": "#/components/schemas/Entity"
@@ -1345,6 +1349,7 @@
           "profile",
           "text",
           "redacted_text",
+          "redacted_profile",
           "entities",
           "meta"
         ],
