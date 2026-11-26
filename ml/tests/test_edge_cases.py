@@ -93,8 +93,11 @@ def test_upstream_llm_garbage_json_falls_back(settings: Settings) -> None:
             raise LLMError("Invalid JSON from model")
 
     with TestClient(create_app(settings, llm=Garbage())) as c:
-        res = c.post("/v1/jobs/analyze", headers={"X-Service-Token": TOKEN},
-                     json={"title": "Go Developer", "description": "Need Go, Docker and Kubernetes skills."})
+        res = c.post(
+            "/v1/jobs/analyze",
+            headers={"X-Service-Token": TOKEN},
+            json={"title": "Go Developer", "description": "Need Go, Docker and Kubernetes skills."},
+        )
         assert res.status_code == 200 and res.json()["source"] == "heuristic"
         assert "Docker" in res.json()["analysis"]["required_skills"]
 

@@ -33,8 +33,11 @@ describe('api client', () => {
     await expect(api.delete('/resumes/1')).resolves.toBeUndefined();
     spy.mockResolvedValueOnce(new Response('oops', { status: 502, statusText: 'Bad Gateway' }));
     await expect(api.get('/x')).rejects.toMatchObject({ status: 502 });
-    spy.mockResolvedValueOnce(new Response(new Blob(['%PDF']), { status: 200, headers: { 'content-type': 'application/pdf' } }));
-    expect(await api.get('/file')).toBeInstanceOf(Blob);
+    spy.mockResolvedValueOnce(new Response('%PDF', { status: 200, headers: { 'content-type': 'application/pdf' } }));
+    // Blob identity differs between undici and jsdom realms on some Node versions; check behaviour.
+    const file = (await api.get('/file')) as Blob;
+    expect(file.type).toBe('application/pdf');
+    expect(file.size).toBe(4);
   });
 
   it('builds query strings skipping empty values and encoding unicode', () => {

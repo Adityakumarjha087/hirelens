@@ -207,6 +207,7 @@ class FeedbackRequest(StrictModel):
     @classmethod
     def _resume(cls, v: str) -> str:
         return _not_blank(v, 20)
+
     profile: ResumeProfile | None = None
     job: FeedbackJob | None = None
 
