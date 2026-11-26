@@ -18,6 +18,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ObjectStorage } from '../storage/storage.service';
 import { detectResumeType, safeFileName } from './file-type';
 
+/** ~3+6+12+24s of retries: rides out an AI-service restart without failing the upload. */
+export const RESUME_ATTEMPTS = 5;
+export const RESUME_BACKOFF = { type: 'exponential' as const, delay: 3000 };
+
 export interface UploadedResumeFile {
   originalname: string;
   buffer: Buffer;
@@ -82,8 +86,8 @@ export class ResumesService {
       'parse',
       { resumeId: resume.id },
       {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 1000 },
+        attempts: RESUME_ATTEMPTS,
+        backoff: RESUME_BACKOFF,
         removeOnComplete: 500,
         removeOnFail: 1000,
       },
@@ -137,11 +141,7 @@ export class ResumesService {
       data: { status: 'PENDING', error: null },
       select: SUMMARY_SELECT,
     });
-    await this.queue.add(
-      'parse',
-      { resumeId: id },
-      { attempts: 3, backoff: { type: 'exponential', delay: 1000 } },
-    );
+    await this.queue.add('parse', { resumeId: id }, { attempts: RESUME_ATTEMPTS, backoff: RESUME_BACKOFF });
     return resume;
   }
 

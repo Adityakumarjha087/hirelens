@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { HttpException, Logger } from '@nestjs/common';
 import { Prisma, ResumeStatus } from '@prisma/client';
 import type { Job } from 'bullmq';
 import { AiClient } from '../ai/ai-client';
@@ -61,6 +61,9 @@ export class ResumeProcessor extends WorkerHost {
       this.logger.log({ resumeId, ms: Date.now() - started, skills: p.skills.length }, 'resume_parsed');
     } catch (err) {
       const message = (err as Error).message;
+      // 4xx from the AI service (unreadable/unsupported file) is permanent: fail now, don't retry.
+      const permanent = err instanceof HttpException && err.getStatus() < 500;
+      finalAttempt = finalAttempt || permanent;
       this.logger.warn({ resumeId, err: message }, 'resume_parse_failed');
       await this.prisma.resume.update({
         where: { id: resumeId },

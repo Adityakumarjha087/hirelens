@@ -388,6 +388,28 @@ describe('Edge cases & security (integration)', () => {
   });
 
   describe('queue recovery', () => {
+    it('retries transient AI outages during parsing instead of failing the upload', async () => {
+      const original = ctx.ai.parseResume.bind(ctx.ai);
+      const spy = jest
+        .spyOn(ctx.ai, 'parseResume')
+        .mockRejectedValueOnce(new ServiceUnavailableException('AI service unavailable'))
+        .mockImplementation(original);
+      const c = await registerUser(ctx, 'CANDIDATE', 'transient@edge.io');
+      const up = await ctx
+        .http()
+        .post('/api/resumes')
+        .set(auth(c.token))
+        .attach('file', RESUME('Flaky Net', 'Go', 2), 'f.txt')
+        .expect(202);
+      const row = await waitFor(async () => {
+        const r = await ctx.prisma.resume.findUnique({ where: { id: up.body.id } });
+        return r?.status === 'PARSED' || r?.status === 'FAILED' ? r : null;
+      }, 20_000);
+      expect(row.status).toBe('PARSED');
+      expect(spy.mock.calls.length).toBeGreaterThanOrEqual(2);
+      spy.mockRestore();
+    });
+
     it('requeues resumes stuck in PROCESSING and fails ones that are hopelessly old', async () => {
       const c = await registerUser(ctx, 'CANDIDATE', 'stuck@edge.io');
       const key = `resumes/${c.id}/stuck.txt`;
