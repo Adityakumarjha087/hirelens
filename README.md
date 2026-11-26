@@ -94,8 +94,25 @@ The service-to-service contract is documented in OpenAPI:
 
 ## Screenshots
 
-> _Placeholder: add screenshots of the recruiter dashboard, ranked candidates with score breakdown,
-> Kanban pipeline and candidate feedback page._
+Captured from the seeded demo stack with `node scripts/screenshots.mjs`.
+
+![Ranked candidates with blind screening](docs/screenshots/ranked-candidates-blind-screening.png)
+*Candidates for a job, ranked by AI match score. Blind screening hides identities and one card shows its explainable score breakdown.*
+
+![Kanban pipeline](docs/screenshots/kanban-pipeline.png)
+*Drag-and-drop pipeline. Candidates stay anonymous until the Interview stage.*
+
+![Recruiter analytics dashboard](docs/screenshots/recruiter-dashboard.png)
+*Recruiter dashboard: open jobs, applicants, average match score, time-to-hire, funnel and trends.*
+
+![AI interview questions](docs/screenshots/interview-questions.png)
+*Interview questions generated from the candidate's resume and the job requirements.*
+
+![Candidate resume feedback](docs/screenshots/candidate-resume-feedback.png)
+*Candidate view: ATS score, checklist and keyword gaps against a target job.*
+
+![Dark mode](docs/screenshots/ranked-candidates-dark.png)
+*Dark mode: the ranked candidate list with the top candidate's score breakdown.*
 
 ## Local setup
 
