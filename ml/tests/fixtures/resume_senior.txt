@@ -1,0 +1,28 @@
+Priya Sharma
+Senior Backend Engineer
+priya.sharma@example.com | +1 415 555 0134 | San Francisco, CA
+linkedin.com/in/priyasharma
+
+SUMMARY
+Backend engineer with 7+ years of experience building distributed systems in Python and Go. She led the
+migration of a monolith to microservices on Kubernetes.
+
+SKILLS
+Python, Go, PostgreSQL, Redis, Kafka, Docker, Kubernetes, AWS, Terraform, FastAPI, gRPC, CI/CD
+
+EXPERIENCE
+Senior Software Engineer — Stripe Inc (Mar 2021 - Present)
+- Led the redesign of the payouts ledger, reducing reconciliation errors by 42%
+- Built a Kafka-based event pipeline processing 25M events/day with p99 latency under 80 ms
+- Mentored 4 engineers and introduced design reviews across the team
+Software Engineer, Dropbox | Jun 2017 – Feb 2021
+- Responsible for maintaining the file metadata service
+- Worked on migrating storage APIs from Python 2 to Python 3
+- Reduced infrastructure cost by $1.2M/year by optimizing PostgreSQL query plans
+
+EDUCATION
+B.S. in Computer Science, University of California Berkeley, 2017
+
+PROJECTS
+OpenLedger — An open-source double-entry accounting library written in Python with PostgreSQL
+QueueViz - Real-time Kafka consumer lag dashboard built with React and FastAPI

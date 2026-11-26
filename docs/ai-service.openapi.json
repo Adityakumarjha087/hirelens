@@ -1,0 +1,1775 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HireLens AI Service",
+    "description": "Internal service-to-service API used by the HireLens NestJS backend. All /v1 routes require the `X-Service-Token` header.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/resumes/parse": {
+      "post": {
+        "tags": [
+          "resumes"
+        ],
+        "summary": "Parse an uploaded resume file (PDF/DOCX/TXT) into structured JSON",
+        "operationId": "parse_resume_file_v1_resumes_parse_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_parse_resume_file_v1_resumes_parse_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseResumeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/resumes/parse-text": {
+      "post": {
+        "tags": [
+          "resumes"
+        ],
+        "summary": "Parse raw resume text into structured JSON",
+        "operationId": "parse_resume_raw_v1_resumes_parse_text_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseTextRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseResumeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/resumes/index": {
+      "post": {
+        "tags": [
+          "vectors"
+        ],
+        "summary": "Index Resume",
+        "operationId": "index_resume_v1_resumes_index_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndexResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/resumes/{resume_id}": {
+      "delete": {
+        "tags": [
+          "vectors"
+        ],
+        "summary": "Delete Resume Vector",
+        "operationId": "delete_resume_vector_v1_resumes__resume_id__delete",
+        "parameters": [
+          {
+            "name": "resume_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resume Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/analyze": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Extract required / nice-to-have skills, min years and seniority",
+        "operationId": "analyze_v1_jobs_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyzeJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/index": {
+      "post": {
+        "tags": [
+          "vectors"
+        ],
+        "summary": "Index Job",
+        "operationId": "index_job_v1_jobs_index_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndexResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "delete": {
+        "tags": [
+          "vectors"
+        ],
+        "summary": "Delete Job Vector",
+        "operationId": "delete_job_vector_v1_jobs__job_id__delete",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/similar-resumes": {
+      "post": {
+        "tags": [
+          "vectors"
+        ],
+        "summary": "Nearest resumes to an indexed job (vector search)",
+        "operationId": "similar_resumes_v1_jobs_similar_resumes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimilarResumesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarResumesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/match": {
+      "post": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "Explainable match scores for candidates against a job",
+        "operationId": "match_v1_match_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/feedback": {
+      "post": {
+        "tags": [
+          "feedback"
+        ],
+        "summary": "ATS score, missing keywords and bullet rewrites",
+        "operationId": "feedback_v1_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/interview-questions": {
+      "post": {
+        "tags": [
+          "interview"
+        ],
+        "summary": "Interview",
+        "operationId": "interview_v1_interview_questions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/redact": {
+      "post": {
+        "tags": [
+          "bias"
+        ],
+        "summary": "Remove name, contact, gender and age signals for blind screening",
+        "operationId": "redact_text_v1_redact_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedactResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalyzeJobRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 20,
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "description"
+        ],
+        "title": "AnalyzeJobRequest"
+      },
+      "AnalyzeJobResponse": {
+        "properties": {
+          "analysis": {
+            "$ref": "#/components/schemas/JobAnalysis"
+          },
+          "llm_provider": {
+            "type": "string",
+            "title": "Llm Provider"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "llm",
+              "heuristic"
+            ],
+            "title": "Source"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "analysis",
+          "llm_provider",
+          "source"
+        ],
+        "title": "AnalyzeJobResponse"
+      },
+      "AtsCheck": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "weight": {
+            "type": "integer",
+            "title": "Weight"
+          },
+          "tip": {
+            "type": "string",
+            "title": "Tip"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "passed",
+          "weight",
+          "tip"
+        ],
+        "title": "AtsCheck"
+      },
+      "Body_parse_resume_file_v1_resumes_parse_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_parse_resume_file_v1_resumes_parse_post"
+      },
+      "BulletRewrite": {
+        "properties": {
+          "original": {
+            "type": "string",
+            "title": "Original"
+          },
+          "suggestion": {
+            "type": "string",
+            "title": "Suggestion"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "original",
+          "suggestion",
+          "reason"
+        ],
+        "title": "BulletRewrite"
+      },
+      "DeleteResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "deleted": {
+            "type": "boolean",
+            "title": "Deleted"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "deleted"
+        ],
+        "title": "DeleteResponse"
+      },
+      "EducationItem": {
+        "properties": {
+          "institution": {
+            "type": "string",
+            "title": "Institution",
+            "default": ""
+          },
+          "degree": {
+            "type": "string",
+            "title": "Degree",
+            "default": ""
+          },
+          "field": {
+            "type": "string",
+            "title": "Field",
+            "default": ""
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "EducationItem"
+      },
+      "Entity": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "label"
+        ],
+        "title": "Entity"
+      },
+      "ExperienceItem": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "company": {
+            "type": "string",
+            "title": "Company",
+            "default": ""
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start",
+            "description": "Start date as written, e.g. 'Jan 2020'"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End",
+            "description": "End date or 'Present'"
+          },
+          "duration_months": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Duration Months",
+            "default": 0
+          },
+          "highlights": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Highlights"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ExperienceItem"
+      },
+      "FeedbackJob": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "required_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required Skills"
+          },
+          "nice_to_have_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nice To Have Skills"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "FeedbackJob"
+      },
+      "FeedbackRequest": {
+        "properties": {
+          "resume_text": {
+            "type": "string",
+            "maxLength": 200000,
+            "minLength": 20,
+            "title": "Resume Text"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResumeProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "job": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeedbackJob"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resume_text"
+        ],
+        "title": "FeedbackRequest"
+      },
+      "FeedbackResponse": {
+        "properties": {
+          "feedback": {
+            "$ref": "#/components/schemas/ResumeFeedback"
+          },
+          "llm_provider": {
+            "type": "string",
+            "title": "Llm Provider"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "llm",
+              "heuristic"
+            ],
+            "title": "Source"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "feedback",
+          "llm_provider",
+          "source"
+        ],
+        "title": "FeedbackResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "title": "Status"
+          },
+          "llm_provider": {
+            "type": "string",
+            "title": "Llm Provider"
+          },
+          "embedding_provider": {
+            "type": "string",
+            "title": "Embedding Provider"
+          },
+          "ner_provider": {
+            "type": "string",
+            "title": "Ner Provider"
+          },
+          "vector_store": {
+            "type": "string",
+            "title": "Vector Store"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "llm_provider",
+          "embedding_provider",
+          "ner_provider",
+          "vector_store",
+          "version"
+        ],
+        "title": "HealthResponse"
+      },
+      "IndexRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "UUID of the resume or job in the backend database"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "text"
+        ],
+        "title": "IndexRequest"
+      },
+      "IndexResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "collection": {
+            "type": "string",
+            "title": "Collection"
+          },
+          "dim": {
+            "type": "integer",
+            "title": "Dim"
+          },
+          "embedding_provider": {
+            "type": "string",
+            "title": "Embedding Provider"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "collection",
+          "dim",
+          "embedding_provider"
+        ],
+        "title": "IndexResponse"
+      },
+      "InterviewQuestion": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "technical",
+              "behavioral",
+              "experience",
+              "gap",
+              "culture"
+            ],
+            "title": "Category"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ],
+            "title": "Difficulty"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question",
+          "category",
+          "difficulty",
+          "rationale"
+        ],
+        "title": "InterviewQuestion"
+      },
+      "InterviewRequest": {
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ResumeProfile"
+          },
+          "job": {
+            "$ref": "#/components/schemas/FeedbackJob"
+          },
+          "count": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Count",
+            "default": 8
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "profile",
+          "job"
+        ],
+        "title": "InterviewRequest"
+      },
+      "InterviewResponse": {
+        "properties": {
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/InterviewQuestion"
+            },
+            "type": "array",
+            "title": "Questions"
+          },
+          "llm_provider": {
+            "type": "string",
+            "title": "Llm Provider"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "llm",
+              "heuristic"
+            ],
+            "title": "Source"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "questions",
+          "llm_provider",
+          "source"
+        ],
+        "title": "InterviewResponse"
+      },
+      "JobAnalysis": {
+        "properties": {
+          "required_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required Skills"
+          },
+          "nice_to_have_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nice To Have Skills"
+          },
+          "min_years_experience": {
+            "type": "number",
+            "maximum": 40.0,
+            "minimum": 0.0,
+            "title": "Min Years Experience",
+            "default": 0.0
+          },
+          "seniority": {
+            "type": "string",
+            "enum": [
+              "intern",
+              "junior",
+              "mid",
+              "senior",
+              "lead"
+            ],
+            "title": "Seniority",
+            "default": "mid"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "JobAnalysis"
+      },
+      "MatchCandidate": {
+        "properties": {
+          "resume_id": {
+            "type": "string",
+            "title": "Resume Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Fallback text if the resume vector is not indexed",
+            "default": ""
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "years_of_experience": {
+            "type": "number",
+            "title": "Years Of Experience",
+            "default": 0.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resume_id"
+        ],
+        "title": "MatchCandidate"
+      },
+      "MatchJob": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Fallback text if the job vector is not indexed",
+            "default": ""
+          },
+          "required_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required Skills"
+          },
+          "nice_to_have_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nice To Have Skills"
+          },
+          "min_years_experience": {
+            "type": "number",
+            "title": "Min Years Experience",
+            "default": 0.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "MatchJob"
+      },
+      "MatchRequest": {
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/MatchJob"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/MatchCandidate"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Candidates"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "job",
+          "candidates"
+        ],
+        "title": "MatchRequest"
+      },
+      "MatchResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/MatchResult"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "job_id",
+          "results"
+        ],
+        "title": "MatchResponse"
+      },
+      "MatchResult": {
+        "properties": {
+          "resume_id": {
+            "type": "string",
+            "title": "Resume Id"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/ScoreBreakdown"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resume_id",
+          "score",
+          "breakdown"
+        ],
+        "title": "MatchResult"
+      },
+      "ParseMeta": {
+        "properties": {
+          "llm_provider": {
+            "type": "string",
+            "title": "Llm Provider"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "llm",
+              "heuristic"
+            ],
+            "title": "Source"
+          },
+          "ner_provider": {
+            "type": "string",
+            "title": "Ner Provider"
+          },
+          "char_count": {
+            "type": "integer",
+            "title": "Char Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "llm_provider",
+          "source",
+          "ner_provider",
+          "char_count"
+        ],
+        "title": "ParseMeta"
+      },
+      "ParseResumeResponse": {
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ResumeProfile"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "redacted_text": {
+            "type": "string",
+            "title": "Redacted Text"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            },
+            "type": "array",
+            "title": "Entities"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ParseMeta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "profile",
+          "text",
+          "redacted_text",
+          "entities",
+          "meta"
+        ],
+        "title": "ParseResumeResponse"
+      },
+      "ParseTextRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "minLength": 20,
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ParseTextRequest"
+      },
+      "ProjectItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "technologies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Technologies"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ProjectItem"
+      },
+      "RedactRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "RedactRequest"
+      },
+      "RedactResponse": {
+        "properties": {
+          "redacted_text": {
+            "type": "string",
+            "title": "Redacted Text"
+          },
+          "removed": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Removed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "redacted_text",
+          "removed"
+        ],
+        "title": "RedactResponse"
+      },
+      "ResumeFeedback": {
+        "properties": {
+          "ats_score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Ats Score"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/AtsCheck"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "missing_keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Keywords"
+          },
+          "present_keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Present Keywords"
+          },
+          "bullet_rewrites": {
+            "items": {
+              "$ref": "#/components/schemas/BulletRewrite"
+            },
+            "type": "array",
+            "title": "Bullet Rewrites"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ats_score",
+          "checks",
+          "missing_keywords",
+          "present_keywords",
+          "bullet_rewrites",
+          "strengths",
+          "summary"
+        ],
+        "title": "ResumeFeedback"
+      },
+      "ResumeProfile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "experience": {
+            "items": {
+              "$ref": "#/components/schemas/ExperienceItem"
+            },
+            "type": "array",
+            "title": "Experience"
+          },
+          "education": {
+            "items": {
+              "$ref": "#/components/schemas/EducationItem"
+            },
+            "type": "array",
+            "title": "Education"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectItem"
+            },
+            "type": "array",
+            "title": "Projects"
+          },
+          "years_of_experience": {
+            "type": "number",
+            "maximum": 60.0,
+            "minimum": 0.0,
+            "title": "Years Of Experience",
+            "default": 0.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ResumeProfile"
+      },
+      "ScoreBreakdown": {
+        "properties": {
+          "semantic_similarity": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Semantic Similarity"
+          },
+          "skill_overlap": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Skill Overlap"
+          },
+          "experience_fit": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Experience Fit"
+          },
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
+          },
+          "matched_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Required"
+          },
+          "missing_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Required"
+          },
+          "matched_nice_to_have": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Nice To Have"
+          },
+          "missing_nice_to_have": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Nice To Have"
+          },
+          "candidate_years": {
+            "type": "number",
+            "title": "Candidate Years"
+          },
+          "required_years": {
+            "type": "number",
+            "title": "Required Years"
+          },
+          "explanation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Explanation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "semantic_similarity",
+          "skill_overlap",
+          "experience_fit",
+          "weights",
+          "matched_required",
+          "missing_required",
+          "matched_nice_to_have",
+          "missing_nice_to_have",
+          "candidate_years",
+          "required_years",
+          "explanation"
+        ],
+        "title": "ScoreBreakdown"
+      },
+      "SimilarHit": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "score"
+        ],
+        "title": "SimilarHit"
+      },
+      "SimilarResumesRequest": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 20
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "job_id"
+        ],
+        "title": "SimilarResumesRequest"
+      },
+      "SimilarResumesResponse": {
+        "properties": {
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/SimilarHit"
+            },
+            "type": "array",
+            "title": "Hits"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "hits"
+        ],
+        "title": "SimilarResumesResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
