@@ -36,7 +36,7 @@ export class NotificationsService {
         },
       );
     } catch (err) {
-      this.logger.error({ err: (err as Error).message, to, template }, 'email_enqueue_failed');
+      this.logger.error({ err: (err as Error).message, template }, 'email_enqueue_failed');
     }
   }
 }

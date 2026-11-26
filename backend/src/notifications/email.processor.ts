@@ -26,7 +26,7 @@ export class EmailProcessor extends WorkerHost {
         where: { id: emailLogId },
         data: { status: EmailStatus.SENT, sentAt: new Date(), error: null },
       });
-      this.logger.log({ to, template, jobId: job.id }, 'email_sent');
+      this.logger.log({ emailLogId, template, jobId: job.id }, 'email_sent');
     } catch (err) {
       const final = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
       await this.prisma.emailLog.update({
