@@ -5,7 +5,7 @@ WORKDIR /app
 
 FROM base AS build
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,id=hirelens-npm-backend,target=/root/.npm npm ci
+RUN npm ci --no-audit --no-fund
 COPY prisma ./prisma
 RUN npx prisma generate
 COPY tsconfig.json tsconfig.build.json nest-cli.json ./

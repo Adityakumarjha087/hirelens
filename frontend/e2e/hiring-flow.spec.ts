@@ -21,8 +21,26 @@ EDUCATION
 B.S. in Computer Science, University of Texas at Austin, 2018
 `;
 
-test('candidate applies with an AI match score and recruiter moves them through the pipeline', async ({ page }) => {
-  const email = `e2e-${Date.now()}@example.com`;
+test('candidate applies with an AI match score and recruiter moves them through the pipeline', async ({ page, request }) => {
+  const runId = `${Date.now()}`;
+  const email = `e2e-${runId}@example.com`;
+  const jobTitle = `E2E Payments Engineer ${runId}`;
+
+  // Each run gets its own blind-screened job so the test is independent of previous runs / seed data.
+  const login = await request.post('/api/auth/login', { data: { email: 'recruiter@hirelens.dev', password: 'Password123!' } });
+  expect(login.ok()).toBeTruthy();
+  const { accessToken } = (await login.json()) as { accessToken: string };
+  const created = await request.post('/api/jobs', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    data: {
+      title: jobTitle,
+      location: 'Austin, TX',
+      remote: true,
+      blindScreening: true,
+      description: 'Requirements:\n- 5+ years of experience with Python and PostgreSQL\n- Kafka, Docker and Kubernetes\nNice to have:\n- Go, Terraform',
+    },
+  });
+  expect(created.status()).toBe(201);
 
   // --- Candidate registers and uploads a resume
   await page.goto('/register');
@@ -45,9 +63,9 @@ test('candidate applies with an AI match score and recruiter moves them through 
 
   // --- Browse and apply to the seeded payments job
   await page.getByRole('link', { name: 'Find jobs' }).first().click();
-  await page.getByLabel('Search jobs').fill('Payments');
+  await page.getByLabel('Search jobs').fill(runId);
   await page.getByRole('button', { name: /Search/ }).click();
-  await page.getByRole('link', { name: /Senior Backend Engineer \(Payments\)/ }).click();
+  await page.getByRole('link', { name: new RegExp(jobTitle) }).click();
   await page.getByRole('button', { name: 'Submit application' }).click();
   await expect(page.getByRole('heading', { name: 'My applications' })).toBeVisible();
   const score = page.getByLabel(/Match score \d+ out of 100/).first();
@@ -65,19 +83,20 @@ test('candidate applies with an AI match score and recruiter moves them through 
   await expect(page.getByTestId('stat-Applicants')).not.toHaveText('0');
 
   await page.getByRole('link', { name: 'Jobs', exact: true }).click();
-  await page.getByRole('link', { name: 'Senior Backend Engineer (Payments)' }).click();
+  await page.getByRole('link', { name: jobTitle }).click();
   await expect(page.getByText('Blind screening on')).toBeVisible();
   const rows = page.getByTestId('candidate-row');
-  await expect(rows.first()).toBeVisible();
-  await expect(page.getByText('Jordan Rivera')).toHaveCount(0); // identity hidden
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first().getByText(/^Candidate [0-9A-F]{4}$/)).toBeVisible();
+  await expect(page.getByText('Jordan Rivera')).toHaveCount(0); // identity hidden during screening
 
-  // --- Kanban: move the newest APPLIED candidate to Interview via the stage menu
+  // --- Kanban: move the candidate to Interview via the stage menu; identity is then revealed
   await page.getByRole('link', { name: 'Pipeline' }).click();
   const applied = page.getByTestId('column-APPLIED');
-  await expect(applied.getByTestId('kanban-card').first()).toBeVisible();
-  const before = await page.getByTestId('column-INTERVIEW').getByTestId('kanban-card').count();
+  await expect(applied.getByTestId('kanban-card')).toHaveCount(1);
   await applied.getByTestId('kanban-card').first().getByRole('combobox').selectOption('INTERVIEW');
-  await expect(page.getByTestId('column-INTERVIEW').getByTestId('kanban-card')).toHaveCount(before + 1);
+  await expect(page.getByTestId('column-INTERVIEW').getByTestId('kanban-card')).toHaveCount(1);
+  await expect(page.getByTestId('column-INTERVIEW').getByText('Jordan Rivera')).toBeVisible();
 
   // --- Interview questions on the application detail page
   await page.getByTestId('column-INTERVIEW').getByTestId('kanban-card').first().getByRole('link').click();
@@ -86,7 +105,7 @@ test('candidate applies with an AI match score and recruiter moves them through 
   await expect(page.getByTestId('interview-questions').getByRole('listitem').first()).toBeVisible();
 });
 
-test('rejects unauthenticated access and wrong roles', async ({ page }) => {
+test('redirects anonymous users and rejects unauthenticated API calls', async ({ page }) => {
   await page.goto('/recruiter');
   await expect(page).toHaveURL(/\/login/);
   const res = await page.request.get('/api/jobs');

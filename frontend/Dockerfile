@@ -3,7 +3,7 @@
 FROM node:22-slim AS build
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
-RUN --mount=type=cache,id=hirelens-npm-frontend,target=/root/.npm npm ci
+RUN npm ci --no-audit --no-fund
 COPY frontend/ .
 RUN npx vite build
 

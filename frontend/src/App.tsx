@@ -26,7 +26,7 @@ const PipelinePage = lazyNamed(() => import('@/pages/recruiter/PipelinePage'), '
 const ApplicationDetailPage = lazyNamed(() => import('@/pages/recruiter/ApplicationDetailPage'), 'ApplicationDetailPage');
 const AdminUsersPage = lazyNamed(() => import('@/pages/admin/AdminUsersPage'), 'AdminUsersPage');
 
-export function createQueryClient(): QueryClient {
+function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
