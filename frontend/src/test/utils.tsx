@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
 import { api } from '@/lib/api';
+import type { User } from '@/lib/types';
 import { AuthProvider } from '@/lib/auth';
 import { ThemeProvider } from '@/lib/theme';
 
@@ -41,7 +42,7 @@ export const USERS = {
   recruiter: { id: 'u2', email: 'r@x.io', fullName: 'Rex Recruiter', role: 'RECRUITER' as const, company: 'Acme', createdAt: '2026-01-01T00:00:00Z' },
 };
 
-export const authRoute = (user: (typeof USERS)[keyof typeof USERS] | null): Route_ =>
+export const authRoute = (user: User | null): Route_ =>
   user ? { method: 'POST', path: '/auth/refresh', body: { accessToken: 'tok', user } } : { method: 'POST', path: '/auth/refresh', status: 401, body: {} };
 
 export function renderPage(ui: ReactElement, { path = '/', route = '/' }: { path?: string; route?: string } = {}) {

@@ -7,7 +7,7 @@ WORKDIR /app
 FROM base AS deps
 ARG INSTALL_ML_EXTRAS=false
 COPY pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=hirelens-uv,target=/root/.cache/uv \
     if [ "$INSTALL_ML_EXTRAS" = "true" ]; then uv sync --frozen --no-dev --no-install-project --extra ml; \
     else uv sync --frozen --no-dev --no-install-project; fi
 
