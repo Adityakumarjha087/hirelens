@@ -130,13 +130,15 @@ services:
 
   web:
     <<: *restart
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     image: hirelens-web:local
-    ports: ["20200:80"]
+    ports: ["20200:8080"]
     depends_on:
       backend: { condition: service_healthy }
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
       interval: 10s
       timeout: 3s
       retries: 10
