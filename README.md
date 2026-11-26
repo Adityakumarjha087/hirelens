@@ -154,9 +154,9 @@ cd frontend && npm ci && npm run dev    # http://localhost:20203
 
 ```bash
 cd ml && uv run pytest                      # 71 tests, ~98% coverage, no network, no keys
-cd backend && npm run test:cov              # needs postgres+redis from compose (uses DB hirelens_test)
-cd frontend && npm run test:cov
-cd frontend && npx playwright test          # against the running compose stack
+cd backend && npm run test:cov              # 57 tests, ~99% lines; needs postgres+redis from compose (DB hirelens_test)
+cd frontend && npm run test:cov             # 39 component tests
+cd frontend && npx playwright test          # 2 e2e specs against the running compose stack
 ```
 
 ## Environment variables
