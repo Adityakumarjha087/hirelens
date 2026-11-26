@@ -1,0 +1,202 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+enum ResumeStatus {
+  PENDING
+  PROCESSING
+  PARSED
+  FAILED
+}
+
+enum JobStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum ApplicationStage {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+enum EmailStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         Role     @default(CANDIDATE)
+  company      String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+  resumes       Resume[]
+  jobs          Job[]
+  applications  Application[]
+  events        ApplicationEvent[]
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  familyId  String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  userAgent String?
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model Resume {
+  id              String       @id @default(uuid()) @db.Uuid
+  candidateId     String       @db.Uuid
+  candidate       User         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  fileKey         String
+  fileName        String
+  mimeType        String
+  sizeBytes       Int
+  status          ResumeStatus @default(PENDING)
+  error           String?
+  rawText         String?
+  redactedText    String?
+  parsed          Json?
+  skills          String[]
+  yearsExperience Float?
+  location        String?
+  headline        String?
+  isPrimary       Boolean      @default(false)
+  parsedAt        DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  applications Application[]
+  feedback     ResumeFeedback[]
+
+  @@index([candidateId])
+}
+
+model Job {
+  id                 String         @id @default(uuid()) @db.Uuid
+  recruiterId        String         @db.Uuid
+  recruiter          User           @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  company            String
+  location           String
+  remote             Boolean        @default(false)
+  employmentType     EmploymentType @default(FULL_TIME)
+  salaryMin          Int?
+  salaryMax          Int?
+  minYearsExperience Float          @default(0)
+  seniority          String?
+  requiredSkills     String[]
+  niceToHaveSkills   String[]
+  status             JobStatus      @default(OPEN)
+  blindScreening     Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  closedAt           DateTime?
+
+  applications Application[]
+  feedback     ResumeFeedback[]
+
+  @@index([recruiterId])
+  @@index([status])
+}
+
+model Application {
+  id                 String           @id @default(uuid()) @db.Uuid
+  jobId              String           @db.Uuid
+  job                Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId        String           @db.Uuid
+  candidate          User             @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  resumeId           String           @db.Uuid
+  resume             Resume           @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  stage              ApplicationStage @default(APPLIED)
+  position           Int              @default(0)
+  matchScore         Float            @default(0)
+  scoreBreakdown     Json?
+  coverLetter        String?
+  interviewQuestions Json?
+  recruiterNotes     String?
+  offeredAt          DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  events ApplicationEvent[]
+
+  @@unique([jobId, candidateId])
+  @@index([jobId, stage])
+  @@index([candidateId])
+}
+
+model ApplicationEvent {
+  id            String            @id @default(uuid()) @db.Uuid
+  applicationId String            @db.Uuid
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fromStage     ApplicationStage?
+  toStage       ApplicationStage
+  actorId       String?           @db.Uuid
+  actor         User?             @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt     DateTime          @default(now())
+
+  @@index([applicationId])
+}
+
+model ResumeFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  resumeId  String   @db.Uuid
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobId     String?  @db.Uuid
+  job       Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  atsScore  Int
+  result    Json
+  createdAt DateTime @default(now())
+
+  @@index([resumeId])
+}
+
+model EmailLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  to        String
+  subject   String
+  template  String
+  status    EmailStatus @default(QUEUED)
+  error     String?
+  createdAt DateTime    @default(now())
+  sentAt    DateTime?
+}

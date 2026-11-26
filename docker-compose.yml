@@ -1,0 +1,148 @@
+name: hirelens
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  postgres:
+    <<: *restart
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hirelens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hirelens}
+      POSTGRES_DB: ${POSTGRES_DB:-hirelens}
+    ports: ["20210:5432"]
+    volumes: [hirelens-pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hirelens} -d ${POSTGRES_DB:-hirelens}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    <<: *restart
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports: ["20211:6379"]
+    volumes: [hirelens-redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  qdrant:
+    <<: *restart
+    image: qdrant/qdrant:v1.13.4
+    ports: ["20212:6333"]
+    volumes: [hirelens-qdrantdata:/qdrant/storage]
+    healthcheck:
+      # The qdrant image ships without curl/wget; probe the TCP port with bash.
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    <<: *restart
+    # Upstream minio/minio images are no longer published on Docker Hub; this is a community rebuild.
+    image: coollabsio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-hirelens}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-hirelens-secret}
+    ports: ["20213:9000", "20214:9001"]
+    volumes: [hirelens-miniodata:/data]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    <<: *restart
+    image: axllent/mailpit:v1.22
+    ports: ["20215:1025", "20216:8025"]
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ai:
+    <<: *restart
+    build:
+      context: ./ml
+      args:
+        INSTALL_ML_EXTRAS: ${AI_INSTALL_ML_EXTRAS:-false}
+    image: hirelens-ai:local
+    environment:
+      AI_ENV: production
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-dev-internal-token}
+      AI_LLM_PROVIDER: ${AI_LLM_PROVIDER:-fake}
+      AI_ANTHROPIC_API_KEY: ${AI_ANTHROPIC_API_KEY:-}
+      AI_ANTHROPIC_MODEL: ${AI_ANTHROPIC_MODEL:-claude-opus-5-5}
+      AI_OPENAI_API_KEY: ${AI_OPENAI_API_KEY:-}
+      AI_GEMINI_API_KEY: ${AI_GEMINI_API_KEY:-}
+      AI_OLLAMA_BASE_URL: ${AI_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      AI_EMBEDDING_PROVIDER: ${AI_EMBEDDING_PROVIDER:-hashing}
+      AI_NER_PROVIDER: ${AI_NER_PROVIDER:-auto}
+      AI_QDRANT_URL: http://qdrant:6333
+    ports: ["20202:8000"]
+    depends_on:
+      qdrant: { condition: service_healthy }
+
+  backend:
+    <<: *restart
+    build: ./backend
+    image: hirelens-backend:local
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hirelens}:${POSTGRES_PASSWORD:-hirelens}@postgres:5432/${POSTGRES_DB:-hirelens}?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-please-32chars}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-7}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:20200}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      AI_SERVICE_URL: http://ai:8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-dev-internal-token}
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: ${S3_BUCKET:-hirelens-resumes}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-hirelens}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-hirelens-secret}
+      S3_FORCE_PATH_STYLE: "true"
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: ${MAIL_FROM:-HireLens <no-reply@hirelens.local>}
+      APP_URL: ${APP_URL:-http://localhost:20200}
+      SEED_ON_START: ${SEED_ON_START:-true}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-300}
+    ports: ["20201:3000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      minio: { condition: service_healthy }
+      mailpit: { condition: service_healthy }
+      ai: { condition: service_healthy }
+
+  web:
+    <<: *restart
+    build: ./frontend
+    image: hirelens-web:local
+    ports: ["20200:80"]
+    depends_on:
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  hirelens-pgdata:
+  hirelens-redisdata:
+  hirelens-qdrantdata:
+  hirelens-miniodata:
