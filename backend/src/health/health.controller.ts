@@ -14,10 +14,13 @@ type Check = { status: 'up' | 'down'; latencyMs: number; detail?: unknown };
 
 async function timed(fn: () => Promise<unknown>): Promise<Check> {
   const start = Date.now();
+  let timer: NodeJS.Timeout | undefined;
   try {
     const detail = await Promise.race([
       fn(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000)),
+      new Promise((_, rej) => {
+        timer = setTimeout(() => rej(new Error('timeout')), 3000);
+      }),
     ]);
     return {
       status: 'up',
@@ -26,6 +29,8 @@ async function timed(fn: () => Promise<unknown>): Promise<Check> {
     };
   } catch (err) {
     return { status: 'down', latencyMs: Date.now() - start, detail: (err as Error).message };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
