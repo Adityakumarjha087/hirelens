@@ -27,7 +27,10 @@ export class ResumeRecoveryService implements OnApplicationBootstrap, OnModuleDe
 
   onApplicationBootstrap(): void {
     if (this.config.get('NODE_ENV', { infer: true }) === 'test') return;
-    this.timer = setInterval(() => void this.sweep().catch((e: Error) => this.logger.warn(e.message)), 60_000);
+    this.timer = setInterval(
+      () => void this.sweep().catch((e: Error) => this.logger.warn(e.message)),
+      60_000,
+    );
     this.timer.unref();
     void this.sweep().catch((e: Error) => this.logger.warn(e.message));
   }
@@ -59,7 +62,12 @@ export class ResumeRecoveryService implements OnApplicationBootstrap, OnModuleDe
       await this.queue.add(
         'parse',
         { resumeId: r.id },
-        { jobId: `recover-${r.id}-${r.updatedAt.getTime()}`, attempts: 2, removeOnComplete: 500, removeOnFail: 1000 },
+        {
+          jobId: `recover-${r.id}-${r.updatedAt.getTime()}`,
+          attempts: 2,
+          removeOnComplete: 500,
+          removeOnFail: 1000,
+        },
       );
       await this.prisma.resume.update({ where: { id: r.id }, data: { status: ResumeStatus.PENDING } });
       requeued++;
